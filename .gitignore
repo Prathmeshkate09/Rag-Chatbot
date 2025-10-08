@@ -1,0 +1,6 @@
+# Ignore FAISS and cache files
+new_book_db/
+__pycache__/
+*.pkl
+*.faiss
+.env
