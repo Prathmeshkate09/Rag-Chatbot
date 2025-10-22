@@ -1,9 +1,9 @@
 streamlit
 python-dotenv
-langchain
-langchain-community
-langchain-google-genai
-langchain-huggingface
+langchain==0.3.27
+langchain-community==0.3.30
+langchain-google-genai==2.0.10
+langchain-huggingface==0.3.1
 faiss-cpu
 huggingface_hub
 sentence-transformers
