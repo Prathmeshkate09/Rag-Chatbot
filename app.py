@@ -6,9 +6,9 @@ from dotenv import load_dotenv
 from langchain_community.vectorstores import FAISS
 from langchain_huggingface import HuggingFaceEmbeddings, HuggingFaceEndpoint
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain.chains.retrieval import create_retrieval_chain
-from langchain.chains.combine_documents import create_stuff_documents_chain
+from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
 
 # --- Page Configuration ---
 st.set_page_config(
@@ -136,16 +136,21 @@ Question: {input}
 
 Answer in detail:
 """)
-                    document_chain = create_stuff_documents_chain(llm, prompt_template)
-                    retrieval_chain = create_retrieval_chain(retriever, document_chain)
+                    # Create and run chain using LCEL
+                    chain = (
+                        {"context": retriever, "input": RunnablePassthrough()}
+                        | prompt_template 
+                        | llm 
+                        | StrOutputParser()
+                    )
 
-                    response = retrieval_chain.invoke({"input": prompt})
-                    answer = response.get("answer", "🤔 I couldn't find an answer.")
+                    answer = chain.invoke(prompt)
                     st.markdown(answer)
 
                     # --- Sources ---
                     with st.expander("📖 Sources Used"):
-                        for i, doc in enumerate(response.get("context", []), 1):
+                        docs = retriever.invoke(prompt)
+                        for i, doc in enumerate(docs, 1):
                             st.write(f"**Source {i}:**\n{doc.page_content}")
 
                 except Exception as e:
